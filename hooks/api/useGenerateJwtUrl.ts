@@ -1,39 +1,13 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import { useMutation } from '@tanstack/react-query';
 import Axios from 'axios';
 
-import { SocialAccountType } from '@/models/SocialAccount';
-
-type AllowedPlatform =
-  | 'tiktok'
-  | 'instagram'
-  | 'linkedin'
-  | 'youtube'
-  | 'facebook'
-  | 'x'
-  | 'threads';
-
-function mapToAllowedPlatform(
-  value: SocialAccountType,
-): AllowedPlatform | null {
-  switch (value) {
-    case 'twitter':
-      return 'x';
-    case 'instagram':
-    case 'facebook':
-    case 'youtube':
-    case 'tiktok':
-    case 'linkedin':
-      return value;
-    default:
-      return null;
-  }
-}
+import { SocialAccounts } from '@/models/SocialAccounts';
 
 interface GenerateJwtParams {
   userId: string;
-  platform?: SocialAccountType;
+  platform: SocialAccounts;
   redirectUrl?: string;
 }
 
@@ -48,11 +22,7 @@ const fetchGenerateJwtUrl = async ({
   platform,
   redirectUrl,
 }: GenerateJwtParams) => {
-  const platforms: AllowedPlatform[] = [];
-  if (platform) {
-    const mapped = mapToAllowedPlatform(platform);
-    if (mapped) platforms.push(mapped);
-  }
+  const platforms = [platform];
 
   const response = await Axios<GenerateJwtResponse>(`/api/upload-post/jwt`, {
     method: 'POST',
@@ -70,6 +40,10 @@ const fetchGenerateJwtUrl = async ({
 };
 
 export const useGenerateJwtUrl = ({ userId }: { userId: string }) => {
+  const [socialAccount, setSocialAccount] = useState<SocialAccounts | null>(
+    null,
+  );
+
   const mutation = useMutation({
     mutationKey: ['upload-post', 'jwt', userId],
     mutationFn: fetchGenerateJwtUrl,
@@ -80,9 +54,10 @@ export const useGenerateJwtUrl = ({ userId }: { userId: string }) => {
       platform,
       redirectUrl,
     }: {
-      platform?: SocialAccountType;
+      platform: SocialAccounts;
       redirectUrl?: string;
     }) => {
+      setSocialAccount(platform);
       const data = await mutation.mutateAsync({
         userId,
         platform,
@@ -90,8 +65,8 @@ export const useGenerateJwtUrl = ({ userId }: { userId: string }) => {
       });
       return data;
     },
-    [mutation, userId],
+    [mutation, userId, setSocialAccount],
   );
 
-  return { ...mutation, generateJwtUrl };
+  return { ...mutation, generateJwtUrl, socialAccount };
 };

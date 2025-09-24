@@ -1,10 +1,11 @@
 'use client';
 
-import { Button } from '@/components/Button';
+import { Button } from '@/components/common';
+import { SocialAccountButton } from '@/components/SocialAccountButton/SocialAccountButton';
 import { useCreateProfile } from '@/hooks/api/useCreateProfile';
-import { useGetProfile } from '@/hooks/api/useGetProfile';
 import { useGenerateJwtUrl } from '@/hooks/api/useGenerateJwtUrl';
-import { SocialAccountType } from '@/models/SocialAccount';
+import { useGetProfile } from '@/hooks/api/useGetProfile';
+import { SocialAccounts } from '@/models/SocialAccounts';
 
 const USER_ID = '123';
 
@@ -17,19 +18,19 @@ export default function Home() {
     userId: USER_ID,
   });
 
-  const { generateJwtUrl, isPending: isGenerating } = useGenerateJwtUrl({
+  const { generateJwtUrl } = useGenerateJwtUrl({
     userId: USER_ID,
   });
 
   const handleConnect = async ({
-    socialAccountType,
+    socialAccount,
   }: {
-    socialAccountType: SocialAccountType;
+    socialAccount: SocialAccounts;
   }) => {
     if (!profile) return;
 
     const { access_url } = await generateJwtUrl({
-      platform: socialAccountType,
+      platform: socialAccount,
       redirectUrl:
         typeof window !== 'undefined' ? window.location.origin : undefined,
     });
@@ -56,50 +57,24 @@ export default function Home() {
   }
 
   return (
-    <div className="bg-base p-8">
+    <div className="bg-base flex flex-col items-center p-8">
       <div className="mb-4">
         <h1 className="text-xl font-semibold">Connect your social accounts</h1>
         <p className="text-sm opacity-80">
           Choose a platform to link via Upload-Post.
         </p>
       </div>
-      <div className="flex flex-wrap gap-3">
-        <Button
-          disabled={isGenerating}
-          onClick={() => handleConnect({ socialAccountType: 'tiktok' })}
-        >
-          {isGenerating ? 'Opening…' : 'TikTok'}
-        </Button>
-        <Button
-          disabled={isGenerating}
-          onClick={() => handleConnect({ socialAccountType: 'instagram' })}
-        >
-          {isGenerating ? 'Opening…' : 'Instagram'}
-        </Button>
-        <Button
-          disabled={isGenerating}
-          onClick={() => handleConnect({ socialAccountType: 'twitter' })}
-        >
-          {isGenerating ? 'Opening…' : 'X (Twitter)'}
-        </Button>
-        <Button
-          disabled={isGenerating}
-          onClick={() => handleConnect({ socialAccountType: 'facebook' })}
-        >
-          {isGenerating ? 'Opening…' : 'Facebook'}
-        </Button>
-        <Button
-          disabled={isGenerating}
-          onClick={() => handleConnect({ socialAccountType: 'youtube' })}
-        >
-          {isGenerating ? 'Opening…' : 'YouTube'}
-        </Button>
-        <Button
-          disabled={isGenerating}
-          onClick={() => handleConnect({ socialAccountType: 'linkedin' })}
-        >
-          {isGenerating ? 'Opening…' : 'LinkedIn'}
-        </Button>
+      <div className="flex max-w-48 flex-col items-stretch gap-3">
+        {Object.values(SocialAccounts).map((socialAccount, index) => (
+          <SocialAccountButton
+            key={`${socialAccount}-${index}`}
+            socialAccount={socialAccount}
+            connect={handleConnect}
+            isConnected={Boolean(profile.social_accounts?.[socialAccount])}
+            size="sm"
+            className="w-full"
+          />
+        ))}
       </div>
     </div>
   );

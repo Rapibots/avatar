@@ -45,8 +45,6 @@ export const GET = async (request: Request) => {
 
   const url = `${UPLOAD_POST_API_BASE}/api/uploadposts/users/${encodeURIComponent(userId)}`;
 
-  console.log({ url });
-
   const upstream = await fetch(url, {
     method: 'GET',
     headers: {
@@ -99,8 +97,6 @@ export const POST = async (request: Request) => {
   );
 
   const upstreamBody = await readJsonSafe(upstream);
-
-  console.log({ upstream, upstreamBody, url: `${UPLOAD_POST_API_BASE}/users` });
 
   if (!upstream.ok) {
     return NextResponse.json(

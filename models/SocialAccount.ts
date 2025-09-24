@@ -1,9 +1,5 @@
-export type SocialAccountType =
-  | 'instagram'
-  | 'twitter'
-  | 'facebook'
-  | 'youtube'
-  | 'tiktok'
-  | 'linkedin'
-  | 'github'
-  | 'website';
+export interface SocialAccount {
+  username: string;
+  display_name: string;
+  reauth_required: boolean;
+}

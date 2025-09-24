@@ -1,6 +1,7 @@
 import { twMerge } from 'tailwind-merge';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: 'sm' | 'md' | 'lg';
 }
 
@@ -19,12 +20,14 @@ export const Button = ({
   return (
     <button
       className={twMerge(
+        'cursor-pointer',
         'bg-black font-semibold text-white',
         'w-fit',
         'rounded-md',
-        'cursor-pointer',
         'transition-all duration-300',
         'hover:bg-neutral-700',
+        'disabled:bg-neutral-300',
+        'disabled:cursor-auto',
         sizeClasses[size],
         className,
       )}
