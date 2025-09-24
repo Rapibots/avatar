@@ -8,33 +8,26 @@ interface CreateProfileResponse {
   email: string;
 }
 
-interface FetchCreateProfileParams {
-  userId: string;
-}
-
-const fetchCreateProfile = async ({ userId }: FetchCreateProfileParams) => {
+const fetchCreateProfile = async () => {
   const response = await Axios<CreateProfileResponse>(
     `/api/upload-post/profiles`,
     {
       method: 'POST',
-      headers: {
-        'x-user-id': userId,
-      },
     },
   );
 
   return response.data;
 };
 
-export const useCreateProfile = ({ userId }: FetchCreateProfileParams) => {
+export const useCreateProfile = () => {
   const mutation = useMutation({
-    mutationKey: ['profile', userId],
+    mutationKey: ['profile'],
     mutationFn: fetchCreateProfile,
   });
 
   const createProfile = useCallback(() => {
-    mutation.mutate({ userId });
-  }, [mutation, userId]);
+    mutation.mutate();
+  }, [mutation]);
 
   return { ...mutation, createProfile };
 };

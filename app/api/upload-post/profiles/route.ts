@@ -1,15 +1,10 @@
 import { NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const UPLOAD_POST_API_BASE = 'https://api.upload-post.com';
-
-function getUserIdFromHeaders(request: Request): string | null {
-  const headerValue = request.headers.get('x-user-id');
-  const trimmed = headerValue?.trim();
-  return trimmed ? trimmed : null;
-}
 
 function getApiKey(): string | null {
   const key = process.env.UPLOAD_POST_API_KEY;
@@ -26,12 +21,12 @@ async function readJsonSafe<T = unknown>(
   }
 }
 
-export const GET = async (request: Request) => {
-  const userId = getUserIdFromHeaders(request);
+export const GET = async () => {
+  const { userId } = await auth();
   if (!userId) {
     return NextResponse.json(
-      { success: false, message: 'Missing UserID header' },
-      { status: 400 },
+      { success: false, message: 'Unauthorized' },
+      { status: 401 },
     );
   }
 
@@ -65,12 +60,12 @@ export const GET = async (request: Request) => {
   return NextResponse.json(data, { status: 200 });
 };
 
-export const POST = async (request: Request) => {
-  const userId = getUserIdFromHeaders(request);
+export const POST = async () => {
+  const { userId } = await auth();
   if (!userId) {
     return NextResponse.json(
-      { success: false, message: 'Missing UserID header' },
-      { status: 400 },
+      { success: false, message: 'Unauthorized' },
+      { status: 401 },
     );
   }
 

@@ -1,15 +1,12 @@
 import { NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const UPLOAD_POST_API_BASE = 'https://api.upload-post.com';
 
-function getUserIdFromHeaders(request: Request): string | null {
-  const headerValue = request.headers.get('x-user-id');
-  const trimmed = headerValue?.trim();
-  return trimmed ? trimmed : null;
-}
+// userId is derived from Clerk auth
 
 function getApiKey(): string | null {
   const key = process.env.UPLOAD_POST_API_KEY;
@@ -34,11 +31,11 @@ type GenerateJwtRequestBody = {
 };
 
 export const POST = async (request: Request) => {
-  const userId = getUserIdFromHeaders(request);
+  const { userId } = await auth();
   if (!userId) {
     return NextResponse.json(
-      { success: false, message: 'Missing UserID header' },
-      { status: 400 },
+      { success: false, message: 'Unauthorized' },
+      { status: 401 },
     );
   }
 

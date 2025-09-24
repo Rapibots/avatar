@@ -2,25 +2,23 @@
 
 import { Button } from '@/components/common';
 import { SocialAccountButton } from '@/components/SocialAccountButton/SocialAccountButton';
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+  useAuth,
+} from '@clerk/nextjs';
 import { useCreateProfile } from '@/hooks/api/useCreateProfile';
 import { useGenerateJwtUrl } from '@/hooks/api/useGenerateJwtUrl';
 import { useGetProfile } from '@/hooks/api/useGetProfile';
 import { SocialAccounts } from '@/models/SocialAccounts';
 
-const USER_ID = '123';
-
 export default function Home() {
-  const { profile, isLoading: isProfileLoading } = useGetProfile({
-    userId: USER_ID,
-  });
-
-  const { createProfile } = useCreateProfile({
-    userId: USER_ID,
-  });
-
-  const { generateJwtUrl } = useGenerateJwtUrl({
-    userId: USER_ID,
-  });
+  const { isSignedIn } = useAuth();
+  const { profile, isLoading: isProfileLoading } = useGetProfile();
+  const { createProfile } = useCreateProfile();
+  const { generateJwtUrl } = useGenerateJwtUrl();
 
   const handleConnect = async ({
     socialAccount,
@@ -44,9 +42,35 @@ export default function Home() {
     return <div className="bg-base p-8">Loading...</div>;
   }
 
+  if (!isSignedIn) {
+    return (
+      <div className="bg-base flex flex-col gap-3 p-8">
+        <div className="flex items-center justify-end gap-3">
+          <SignedOut>
+            <SignInButton>
+              <Button size="sm">Sign in</Button>
+            </SignInButton>
+          </SignedOut>
+        </div>
+        <h1 className="text-xl font-semibold">Connect your social accounts</h1>
+        <p className="text-sm opacity-80">Sign in to continue.</p>
+      </div>
+    );
+  }
+
   if (!profile) {
     return (
       <div className="bg-base flex flex-col gap-3 p-8">
+        <div className="flex items-center justify-end gap-3">
+          <SignedOut>
+            <SignInButton>
+              <Button size="sm">Sign in</Button>
+            </SignInButton>
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+        </div>
         <h1 className="text-xl font-semibold">Connect your social accounts</h1>
         <p className="text-sm opacity-80">
           First, create your profile to get started.
@@ -58,6 +82,14 @@ export default function Home() {
 
   return (
     <div className="bg-base flex flex-col items-center p-8">
+      <div className="mb-2 flex w-full items-center justify-end gap-3">
+        <SignedOut>
+          <SignInButton />
+        </SignedOut>
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+      </div>
       <div className="mb-4">
         <h1 className="text-xl font-semibold">Connect your social accounts</h1>
         <p className="text-sm opacity-80">

@@ -6,7 +6,6 @@ import Axios from 'axios';
 import { SocialAccounts } from '@/models/SocialAccounts';
 
 interface GenerateJwtParams {
-  userId: string;
   platform: SocialAccounts;
   redirectUrl?: string;
 }
@@ -18,7 +17,6 @@ interface GenerateJwtResponse {
 }
 
 const fetchGenerateJwtUrl = async ({
-  userId,
   platform,
   redirectUrl,
 }: GenerateJwtParams) => {
@@ -28,7 +26,6 @@ const fetchGenerateJwtUrl = async ({
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-user-id': userId,
     },
     data: {
       ...(platforms.length ? { platforms } : {}),
@@ -39,13 +36,13 @@ const fetchGenerateJwtUrl = async ({
   return response.data;
 };
 
-export const useGenerateJwtUrl = ({ userId }: { userId: string }) => {
+export const useGenerateJwtUrl = () => {
   const [socialAccount, setSocialAccount] = useState<SocialAccounts | null>(
     null,
   );
 
   const mutation = useMutation({
-    mutationKey: ['upload-post', 'jwt', userId],
+    mutationKey: ['upload-post', 'jwt'],
     mutationFn: fetchGenerateJwtUrl,
   });
 
@@ -58,14 +55,10 @@ export const useGenerateJwtUrl = ({ userId }: { userId: string }) => {
       redirectUrl?: string;
     }) => {
       setSocialAccount(platform);
-      const data = await mutation.mutateAsync({
-        userId,
-        platform,
-        redirectUrl,
-      });
+      const data = await mutation.mutateAsync({ platform, redirectUrl });
       return data;
     },
-    [mutation, userId, setSocialAccount],
+    [mutation, setSocialAccount],
   );
 
   return { ...mutation, generateJwtUrl, socialAccount };

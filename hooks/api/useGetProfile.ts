@@ -9,27 +9,16 @@ interface GetProfileResponse {
   profile: Profile;
 }
 
-interface FetchGetProfileParams {
-  userId: string;
-}
-
-const fetchGetProfile = async ({ userId }: FetchGetProfileParams) => {
-  const response = await Axios<GetProfileResponse>(
-    `/api/upload-post/profiles`,
-    {
-      headers: {
-        'x-user-id': userId,
-      },
-    },
-  );
+const fetchGetProfile = async () => {
+  const response = await Axios<GetProfileResponse>(`/api/upload-post/profiles`);
 
   return response.data;
 };
 
-export const useGetProfile = ({ userId }: FetchGetProfileParams) => {
+export const useGetProfile = () => {
   const query = useQuery({
-    queryKey: ['profile', userId],
-    queryFn: () => fetchGetProfile({ userId }),
+    queryKey: ['profile'],
+    queryFn: () => fetchGetProfile(),
     select: (data) => data.profile,
   });
 
