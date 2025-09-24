@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Axios from 'axios';
 import { useCallback } from 'react';
 
@@ -20,9 +20,13 @@ const fetchCreateProfile = async () => {
 };
 
 export const useCreateProfile = () => {
+  const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationKey: ['profile'],
     mutationFn: fetchCreateProfile,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['profile'] });
+    },
   });
 
   const createProfile = useCallback(() => {
